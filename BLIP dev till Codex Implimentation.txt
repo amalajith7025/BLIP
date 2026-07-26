@@ -1,0 +1,918 @@
+1. Project Vision
+Purpose
+
+BLIP (Business Logic Intelligence Platform) is an enterprise-grade investigation and business analysis platform that helps organizations identify operational problems, investigate root causes, validate hypotheses with evidence, and generate actionable recommendations using structured analytics and AI assistance.
+
+The platform is designed to bridge traditional Business Analysis, Six Sigma, Lean methodologies, and modern AI-driven investigation workflows.
+
+Long-Term Goals
+
+The product aims to become an enterprise operating intelligence platform capable of:
+
+Business problem investigation
+Root cause analysis
+Evidence management
+KPI monitoring
+Executive dashboards
+AI-assisted analytics
+AI-generated recommendations
+Knowledge management
+Organization-wide investigation repository
+Decision intelligence
+
+Eventually BLIP should evolve into a SaaS product.
+
+Target Users
+Business Analysts
+Data Analysts
+Process Excellence Teams
+Six Sigma Practitioners
+Operations Managers
+Consultants
+Product Managers
+Enterprise Leadership
+PMO Teams
+Core Business Value
+
+BLIP enables organizations to:
+
+investigate problems systematically
+centralize evidence
+reduce decision bias
+preserve organizational knowledge
+standardize investigations
+improve operational performance
+generate AI-assisted recommendations
+Success Criteria
+Multi-tenant SaaS
+Enterprise security
+AI-assisted investigation
+Fast investigation creation
+High usability
+Audit trail
+Scalable architecture
+API-first design
+2. Product Requirements
+Features Implemented
+
+Backend foundation
+
+Authentication foundation
+
+Database models
+
+CRUD architecture
+
+Service layer
+
+JWT utilities
+
+Password hashing
+
+Router architecture
+
+Pydantic schemas
+
+SQLAlchemy models
+
+Configuration management
+
+Features Planned
+
+Tenant management
+
+Organization management
+
+User management
+
+RBAC
+
+JWT authorization
+
+Permissions
+
+Investigation workflow
+
+Business questions
+
+Evidence management
+
+Hypothesis testing
+
+Findings
+
+Recommendations
+
+Dashboards
+
+Analytics
+
+Reporting
+
+Notifications
+
+Audit logs
+
+Search
+
+AI assistant
+
+Knowledge graph
+
+Document uploads
+
+LLM integration
+
+Export
+
+Features Postponed
+
+Frontend
+
+Notifications
+
+Billing
+
+Payments
+
+External integrations
+
+Teams
+
+Slack
+
+SSO
+
+SCIM
+
+User Flow
+
+Login
+
+↓
+
+Dashboard
+
+↓
+
+Investigation
+
+↓
+
+Business Questions
+
+↓
+
+Evidence
+
+↓
+
+Hypothesis
+
+↓
+
+Validation
+
+↓
+
+Findings
+
+↓
+
+Recommendations
+
+↓
+
+Executive Dashboard
+
+Functional Requirements
+JWT Authentication
+Multi-tenancy
+Investigation lifecycle
+Role-based authorization
+AI recommendations
+KPI calculations
+Non-Functional Requirements
+
+FastAPI
+
+Production-ready
+
+Scalable
+
+Maintainable
+
+SOLID
+
+Type-safe
+
+REST API
+
+High cohesion
+
+Low coupling
+
+3. System Architecture
+Overall Architecture
+
+Layered Architecture
+
+Router
+
+↓
+
+Service
+
+↓
+
+CRUD / Repository
+
+↓
+
+Database
+Backend
+
+FastAPI
+
+SQLAlchemy
+
+PostgreSQL
+
+Pydantic v2
+
+Passlib
+
+python-jose
+
+Folder Structure
+app/
+
+auth/
+
+core/
+
+crud/
+
+database/
+
+models/
+
+routers/
+
+schemas/
+
+services/
+
+main.py
+Backend Architecture
+
+Routers
+
+↓
+
+Services
+
+↓
+
+CRUD
+
+↓
+
+Database
+
+API
+
+REST
+
+JSON
+
+Pydantic
+
+Service Layer
+
+Business logic only
+
+No SQL
+
+CRUD Layer
+
+Database operations only
+
+No business rules
+
+Dependency Injection
+
+FastAPI Depends()
+
+Database session injection
+
+Database
+
+PostgreSQL
+
+UUID primary keys
+
+SQLAlchemy ORM
+
+Authentication
+
+Password hashing
+
+JWT
+
+Bearer Token
+
+Authorization
+
+Planned RBAC
+
+Permission middleware
+
+Error Handling
+
+HTTPException
+
+ValueError converted in router
+
+Logging
+
+Currently SQLAlchemy echo=True
+
+Future:
+
+Structured logging
+
+Audit logging
+
+Central logging
+
+Configuration
+
+Pydantic Settings
+
+Environment variables
+
+4. Database
+
+Current Models
+
+Tenant
+
+Organization
+
+Role
+
+User
+
+Industry
+
+OrganizationIndustry
+
+OrganizationUnit
+
+Investigation
+
+BusinessQuestion
+
+Artifact
+
+Fact
+
+Evidence
+
+Hypothesis
+
+HypothesisEvidence
+
+Finding
+
+Recommendation
+
+Relationships
+
+Tenant
+
+↓
+
+Organizations
+
+↓
+
+Users
+
+Investigations
+
+Organization Units
+
+Organization Industries
+
+Role
+
+↓
+
+Users
+
+Investigation
+
+↓
+
+Business Questions
+
+Evidence
+
+Findings
+
+Recommendations
+
+Current PK
+
+UUID
+
+Indexes
+
+Role Name
+
+Tenant Name
+
+Email
+
+Constraints
+
+Foreign Keys
+
+Unique Role
+
+Unique Email
+
+Known Issues
+
+No Alembic yet
+
+No seed data
+
+No RBAC
+
+No permissions table
+
+5. API
+
+Authentication
+
+POST /auth/register
+
+POST /auth/login
+
+Existing CRUD APIs
+
+Tenant
+
+Organization
+
+Industry
+
+Investigation
+
+etc.
+
+Planned
+
+RBAC
+
+Admin
+
+Analytics
+
+Dashboard
+
+Reports
+
+Search
+
+AI
+
+Authentication
+
+JWT
+
+Bearer
+
+6. Security
+
+Current
+
+Password Hashing
+
+bcrypt
+
+JWT creation
+
+JWT decode
+
+Email validation
+
+Missing
+
+JWT middleware
+
+Current User dependency
+
+Refresh Tokens
+
+Permissions
+
+RBAC
+
+Rate limiting
+
+Audit logs
+
+CSRF (if web)
+
+Roadmap
+
+JWT Dependency
+
+↓
+
+Role Check
+
+↓
+
+Permission Check
+
+↓
+
+Audit
+
+↓
+
+Refresh Tokens
+
+7. Analytics Engine
+
+Purpose
+
+Business investigation engine
+
+KPIs
+
+CSAT
+
+FCR
+
+Repeat Contact Rate
+
+Productivity
+
+Resolution Time
+
+AHT
+
+Operational Cost
+
+Utilization
+
+Process Health
+
+Metrics
+
+Counts
+
+Percentages
+
+Rolling averages
+
+Trends
+
+Root Cause Frequency
+
+Dashboards
+
+Executive
+
+Manager
+
+Analyst
+
+Organization
+
+Data Flow
+
+Investigation
+
+↓
+
+Evidence
+
+↓
+
+Facts
+
+↓
+
+Hypothesis
+
+↓
+
+Validation
+
+↓
+
+Finding
+
+↓
+
+Recommendation
+
+Future AI
+
+Root cause prediction
+
+Pattern detection
+
+Recommendation engine
+
+Anomaly detection
+
+Executive summaries
+
+8. AI Features
+
+Planned
+
+AI Investigation Assistant
+
+Chat with Investigation
+
+Evidence summarization
+
+Root Cause Suggestions
+
+Recommendation Generation
+
+KPI Interpretation
+
+Executive Summary
+
+LLM assisted documentation
+
+Knowledge Graph
+
+RAG
+
+Architecture
+
+Investigation
+
+↓
+
+Vector Store
+
+↓
+
+Embeddings
+
+↓
+
+LLM
+
+↓
+
+Response
+
+9. Code Decisions
+
+Sync SQLAlchemy chosen
+
+Reason
+
+Simplicity
+
+Better learning
+
+Less complexity
+
+Router → Service → CRUD
+
+Chosen
+
+Maintainability
+
+Testing
+
+Separation of concerns
+
+UUID keys
+
+Chosen
+
+Distributed systems
+
+Security
+
+Scalability
+
+Business Logic
+
+Service Layer
+
+Database
+
+CRUD only
+
+10. Coding Standards
+
+Snake Case
+
+Type hints everywhere
+
+Pydantic v2
+
+One responsibility per file
+
+Business logic never inside routers
+
+CRUD never inside routers
+
+No SQL in routers
+
+Minimal duplication
+
+Production-ready formatting
+
+11. Completed Work
+
+FastAPI Setup
+
+Configuration
+
+Database Connection
+
+Models
+
+Schemas
+
+CRUD
+
+Authentication Service
+
+JWT
+
+Password Hashing
+
+Routers
+
+Application startup
+
+Swagger
+
+Database connection verified
+
+Server successfully running
+
+12. Current State
+
+Application starts successfully.
+
+Swagger UI works.
+
+Database connection verified.
+
+Authentication router exists.
+
+Register endpoint exists.
+
+Login endpoint exists.
+
+Server startup completed successfully.
+
+Current blocker:
+
+Authentication cannot be tested because no default Tenant, Organization, or Role records exist in the database.
+
+A database seeding system has been started but is not yet working due to an import mismatch.
+
+13. Next Priorities
+Fix the database seed module by importing SessionLocal from the correct module (app.core.database or the actual session file).
+Create an idempotent seed script to insert:
+Default Tenant
+Default Organization
+Default Roles (Admin, Manager, Analyst, Viewer)
+Run the seed script successfully.
+Register the first admin user through /auth/register.
+Verify /auth/login returns a valid JWT.
+Build get_current_user JWT dependency.
+Implement RBAC.
+Protect existing endpoints.
+Introduce Alembic for migrations.
+Continue with the investigation workflow modules.
+14. Known Issues
+Bugs
+Seed script currently imports SessionLocal from a non-existent app.database.session.
+Needs to be updated to the actual session module.
+Technical Debt
+No Alembic migrations.
+SQLAlchemy echo=True enabled (development only).
+No centralized logging.
+No audit trail.
+TODOs
+Seed database.
+JWT dependency.
+RBAC.
+Permissions model.
+Refresh tokens.
+Rate limiting.
+Tests.
+Security Gaps
+Endpoints are not yet protected.
+No role enforcement.
+No permission enforcement.
+15. Codex Workflow
+
+Development responsibilities are intentionally split:
+
+ChatGPT
+Product architecture
+System design
+Business logic
+API design
+Database design
+Code reviews
+Mentoring
+Technical decisions
+Standards
+Prioritization
+Codex
+Feature implementation
+Refactoring
+Static analysis
+Debugging
+Project-wide code review
+Test generation
+Large-scale code changes
+Feature workflow
+
+Every feature follows this sequence:
+
+Design (ChatGPT)
+Codex Analysis
+Approval
+Codex Implementation
+Testing
+ChatGPT Review
+
+This separation is an agreed development process for the project.
+
+16. Lessons Learned
+Validate the application by running it before adding new features; startup errors are easier to fix incrementally than after multiple changes.
+Keep business logic in the service layer and database access in the CRUD layer to maintain clear separation of concerns.
+Use UUID primary keys throughout for consistency and scalability.
+Prefer idempotent seed scripts so environments can be initialized repeatedly without duplicate data.
+Avoid guessing project structure during implementation; verify actual module locations (such as the database session file) before generating code.
+Build on a stable foundation first (authentication, database, architecture) before adding advanced features like RBAC or AI.
+17. Future Roadmap
+Milestone 1 – Foundation
+✅ FastAPI setup
+✅ Database connection
+✅ Models
+✅ CRUD
+✅ Services
+✅ Authentication foundation
+✅ Application startup
+⬜ Database seeding
+⬜ Authentication verification
+Milestone 2 – Security
+JWT middleware
+Current user dependency
+RBAC
+Permissions
+Protected APIs
+Milestone 3 – Investigation Engine
+Investigation CRUD
+Business questions
+Evidence
+Hypotheses
+Findings
+Recommendations
+Milestone 4 – Analytics
+KPI engine
+Dashboards
+Reports
+Trend analysis
+Executive views
+Milestone 5 – AI
+AI investigation assistant
+RAG pipeline
+Evidence summarization
+Recommendation generation
+Natural language querying
+Milestone 6 – Platform
+Frontend
+Notifications
+Audit logs
+Search
+Multi-organization enhancements
+Performance optimization
+Deployment
+Monitoring
+Version 1.0 release

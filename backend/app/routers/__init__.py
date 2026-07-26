@@ -22,3 +22,6 @@ from .finding import (
 from .recommendation import (
     router as recommendation_router,
 )
+from .auth import router as auth_router
+from .user import router as user_router
+from .workspace import router as workspace_router

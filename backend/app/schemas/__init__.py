@@ -82,3 +82,29 @@ from .recommendation import (
     RecommendationUpdate,
     RecommendationResponse,
 )
+
+from .role import (
+    RoleBase,
+    RoleCreate,
+    RoleUpdate,
+    RoleResponse,
+)
+
+from .user import (
+    UserBase,
+    UserCreate,
+    UserUpdate,
+    UserResponse,
+)
+
+from .auth import (
+    LoginRequest,
+    TokenResponse,
+)
+
+from .workspace import (
+    WorkspaceCreate,
+    WorkspaceUpdate,
+    WorkspaceResponse,
+    WorkspaceListResponse,
+)

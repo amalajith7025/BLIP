@@ -4,12 +4,13 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
-from app.crud import organization as organization_crud
 from app.schemas.organization import (
     OrganizationCreate,
-    OrganizationUpdate,
     OrganizationResponse,
+    OrganizationStatusUpdate,
+    OrganizationUpdate,
 )
+from app.services.organization import OrganizationService
 
 router = APIRouter(
     prefix="/organizations",
@@ -19,12 +20,12 @@ router = APIRouter(
 
 @router.get("/", response_model=list[OrganizationResponse])
 def get_organizations(db: Session = Depends(get_db)):
-    return organization_crud.get_all(db)
+    return OrganizationService.list_organizations(db)
 
 
 @router.get("/{organization_id}", response_model=OrganizationResponse)
 def get_organization(organization_id: UUID, db: Session = Depends(get_db)):
-    organization = organization_crud.get_by_id(db, organization_id)
+    organization = OrganizationService.get_organization(db, organization_id)
 
     if not organization:
         raise HTTPException(
@@ -44,7 +45,13 @@ def create_organization(
     organization: OrganizationCreate,
     db: Session = Depends(get_db),
 ):
-    return organization_crud.create(db, organization)
+    try:
+        return OrganizationService.create_organization(db, organization)
+    except ValueError as error:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=str(error),
+        )
 
 
 @router.put("/{organization_id}", response_model=OrganizationResponse)
@@ -53,7 +60,17 @@ def update_organization(
     organization: OrganizationUpdate,
     db: Session = Depends(get_db),
 ):
-    updated = organization_crud.update(db, organization_id, organization)
+    try:
+        updated = OrganizationService.update_organization(
+            db,
+            organization_id,
+            organization,
+        )
+    except ValueError as error:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=str(error),
+        )
 
     if not updated:
         raise HTTPException(
@@ -64,17 +81,22 @@ def update_organization(
     return updated
 
 
-@router.delete("/{organization_id}")
-def delete_organization(
+@router.patch("/{organization_id}/status", response_model=OrganizationResponse)
+def update_organization_status(
     organization_id: UUID,
+    organization_status: OrganizationStatusUpdate,
     db: Session = Depends(get_db),
 ):
-    deleted = organization_crud.delete(db, organization_id)
+    updated = OrganizationService.update_organization_status(
+        db,
+        organization_id,
+        organization_status.status,
+    )
 
-    if not deleted:
+    if not updated:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Organization not found",
         )
 
-    return {"message": "Organization deleted successfully"}
+    return updated

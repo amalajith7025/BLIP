@@ -12,6 +12,10 @@ from .hypothesis import Hypothesis
 from .hypothesis_evidence import HypothesisEvidence
 from .finding import Finding
 from .recommendation import Recommendation
+from .role import Role
+from .user import User
+from .workspace import Workspace
+from .membership import Membership
 
 __all__ = [
     "Tenant",
@@ -28,4 +32,8 @@ __all__ = [
     "HypothesisEvidence",
     "Finding",
     "Recommendation",
+    "Role",
+    "User",
+    "Workspace",
+    "Membership",
 ]

@@ -18,6 +18,14 @@ def get_by_id(db: Session, organization_id: UUID):
     )
 
 
+def get_by_name(db: Session, name: str):
+    return (
+        db.query(Organization)
+        .filter(Organization.name == name)
+        .first()
+    )
+
+
 def create(db: Session, organization: OrganizationCreate):
     db_organization = Organization(**organization.model_dump())
 
@@ -45,13 +53,14 @@ def update(db: Session, organization_id: UUID, organization: OrganizationUpdate)
     return db_organization
 
 
-def delete(db: Session, organization_id: UUID):
+def update_status(db: Session, organization_id: UUID, status: str):
     db_organization = get_by_id(db, organization_id)
 
     if not db_organization:
         return None
 
-    db.delete(db_organization)
+    db_organization.status = status
     db.commit()
+    db.refresh(db_organization)
 
     return db_organization

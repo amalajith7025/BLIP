@@ -3,8 +3,10 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
+from app.auth.permissions import require_authenticated_user_dependency
 from app.core.database import get_db
 from app.crud import tenant as tenant_crud
+from app.models.user import User
 from app.schemas.tenant import (
     TenantCreate,
     TenantUpdate,
@@ -18,12 +20,19 @@ router = APIRouter(
 
 
 @router.get("/", response_model=list[TenantResponse])
-def get_all_tenants(db: Session = Depends(get_db)):
+def get_all_tenants(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_authenticated_user_dependency),
+):
     return tenant_crud.get_all(db)
 
 
 @router.get("/{tenant_id}", response_model=TenantResponse)
-def get_tenant(tenant_id: UUID, db: Session = Depends(get_db)):
+def get_tenant(
+    tenant_id: UUID,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_authenticated_user_dependency),
+):
     tenant = tenant_crud.get_by_id(db, tenant_id)
 
     if tenant is None:
@@ -36,6 +45,7 @@ def get_tenant(tenant_id: UUID, db: Session = Depends(get_db)):
 def create_tenant(
     tenant: TenantCreate,
     db: Session = Depends(get_db),
+    current_user: User = Depends(require_authenticated_user_dependency),
 ):
     return tenant_crud.create(db, tenant)
 
@@ -45,6 +55,7 @@ def update_tenant(
     tenant_id: UUID,
     tenant: TenantUpdate,
     db: Session = Depends(get_db),
+    current_user: User = Depends(require_authenticated_user_dependency),
 ):
     updated = tenant_crud.update(db, tenant_id, tenant)
 
@@ -58,6 +69,7 @@ def update_tenant(
 def delete_tenant(
     tenant_id: UUID,
     db: Session = Depends(get_db),
+    current_user: User = Depends(require_authenticated_user_dependency),
 ):
     deleted = tenant_crud.delete(db, tenant_id)
 

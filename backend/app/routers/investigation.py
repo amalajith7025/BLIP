@@ -3,8 +3,13 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
+from app.auth.permissions import (
+    authorize_investigation_access,
+    require_authenticated_user_dependency,
+)
 from app.core.database import get_db
 from app.crud import investigation
+from app.models.user import User
 from app.schemas import (
     InvestigationCreate,
     InvestigationUpdate,
@@ -23,8 +28,14 @@ router = APIRouter(
 )
 def get_all(
     db: Session = Depends(get_db),
+    current_user: User = Depends(require_authenticated_user_dependency),
 ):
-    return investigation.get_all(db)
+    investigations = investigation.get_all(db)
+    return [
+        item
+        for item in investigations
+        if item.organization_id == current_user.organization_id
+    ]
 
 
 @router.get(
@@ -34,6 +45,7 @@ def get_all(
 def get_by_id(
     investigation_id: UUID,
     db: Session = Depends(get_db),
+    current_user: User = Depends(require_authenticated_user_dependency),
 ):
     investigation_obj = investigation.get_by_id(
         db,
@@ -46,6 +58,8 @@ def get_by_id(
             detail="Investigation not found",
         )
 
+    authorize_investigation_access(db, current_user, investigation_id)
+
     return investigation_obj
 
 
@@ -57,6 +71,7 @@ def get_by_id(
 def create(
     investigation_data: InvestigationCreate,
     db: Session = Depends(get_db),
+    current_user: User = Depends(require_authenticated_user_dependency),
 ):
     return investigation.create(
         db,
@@ -72,7 +87,18 @@ def update(
     investigation_id: UUID,
     investigation_data: InvestigationUpdate,
     db: Session = Depends(get_db),
+    current_user: User = Depends(require_authenticated_user_dependency),
 ):
+    existing = investigation.get_by_id(db, investigation_id)
+
+    if not existing:
+        raise HTTPException(
+            status_code=404,
+            detail="Investigation not found",
+        )
+
+    authorize_investigation_access(db, current_user, investigation_id)
+
     updated = investigation.update(
         db,
         investigation_id,
@@ -95,7 +121,18 @@ def update(
 def delete(
     investigation_id: UUID,
     db: Session = Depends(get_db),
+    current_user: User = Depends(require_authenticated_user_dependency),
 ):
+    existing = investigation.get_by_id(db, investigation_id)
+
+    if not existing:
+        raise HTTPException(
+            status_code=404,
+            detail="Investigation not found",
+        )
+
+    authorize_investigation_access(db, current_user, investigation_id)
+
     deleted = investigation.delete(
         db,
         investigation_id,

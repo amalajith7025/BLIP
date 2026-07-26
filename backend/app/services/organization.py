@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.crud import organization as organization_crud
 from app.models.organization import Organization
+from app.models.user import User
 from app.schemas.organization import (
     OrganizationCreate,
     OrganizationStatus,
@@ -36,8 +37,19 @@ class OrganizationService:
         return organization_crud.get_by_id(db, organization_id)
 
     @staticmethod
-    def list_organizations(db: Session) -> list[Organization]:
-        return organization_crud.get_all(db)
+    def list_organizations(
+        db: Session,
+        current_user: User | None = None,
+    ) -> list[Organization]:
+        organizations = organization_crud.get_all(db)
+        if current_user is None:
+            return organizations
+
+        return [
+            organization
+            for organization in organizations
+            if organization.organization_id == current_user.organization_id
+        ]
 
     @staticmethod
     def update_organization(

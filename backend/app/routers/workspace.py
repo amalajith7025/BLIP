@@ -3,7 +3,11 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.auth.dependencies import get_current_user
+from app.auth.permissions import (
+    require_authenticated_user_dependency,
+    require_workspace_member_dependency,
+    require_workspace_owner_dependency,
+)
 from app.core.database import get_db
 from app.models.user import User
 from app.schemas.workspace import (
@@ -34,7 +38,7 @@ router = APIRouter(
 def create_workspace(
     workspace: WorkspaceCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_authenticated_user_dependency),
 ):
     try:
         return WorkspaceService.create_workspace(db, workspace, current_user)
@@ -48,7 +52,7 @@ def create_workspace(
 @router.get("/", response_model=WorkspaceListResponse)
 def list_workspaces(
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_authenticated_user_dependency),
 ):
     return {"items": WorkspaceService.list_workspaces(db, current_user)}
 
@@ -57,7 +61,7 @@ def list_workspaces(
 def get_workspace(
     workspace_id: UUID,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_workspace_member_dependency),
 ):
     try:
         return WorkspaceService.get_workspace(db, workspace_id, current_user)
@@ -73,7 +77,7 @@ def update_workspace(
     workspace_id: UUID,
     workspace: WorkspaceUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_workspace_owner_dependency),
 ):
     try:
         return WorkspaceService.update_workspace(
@@ -103,7 +107,7 @@ def update_workspace(
 def delete_workspace(
     workspace_id: UUID,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_workspace_owner_dependency),
 ):
     try:
         WorkspaceService.delete_workspace(db, workspace_id, current_user)

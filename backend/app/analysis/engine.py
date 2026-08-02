@@ -5,6 +5,7 @@ import pandas as pd
 from .profiler import DataProfiler
 from .registry import AnalysisRegistry
 from .plugins.descriptive_statistics import DescriptiveStatistics
+from .plugins.frequency_distribution import FrequencyDistribution
 
 
 class AnalysisEngine:
@@ -18,6 +19,7 @@ class AnalysisEngine:
         # Register built-in analysis plugins explicitly so they
         # are available to the engine at runtime.
         self.registry.register(DescriptiveStatistics())
+        self.registry.register(FrequencyDistribution())
 
     def analyze(
         self,

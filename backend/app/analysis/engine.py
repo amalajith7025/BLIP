@@ -4,8 +4,10 @@ import pandas as pd
 
 from .profiler import DataProfiler
 from .registry import AnalysisRegistry
+
 from .plugins.descriptive_statistics import DescriptiveStatistics
 from .plugins.frequency_distribution import FrequencyDistribution
+from .plugins.pareto_analysis import ParetoAnalysis
 
 
 class AnalysisEngine:
@@ -16,10 +18,11 @@ class AnalysisEngine:
     def __init__(self):
         self.profiler = DataProfiler()
         self.registry = AnalysisRegistry()
-        # Register built-in analysis plugins explicitly so they
-        # are available to the engine at runtime.
+
+        # Register built-in analysis plugins explicitly.
         self.registry.register(DescriptiveStatistics())
         self.registry.register(FrequencyDistribution())
+        self.registry.register(ParetoAnalysis())
 
     def analyze(
         self,
@@ -37,7 +40,6 @@ class AnalysisEngine:
         analyses = []
 
         for plugin in plugins:
-
             results = plugin.execute(dataset)
 
             analyses.append(

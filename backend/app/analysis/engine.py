@@ -38,6 +38,8 @@ from .plugins.birch_analysis import BirchAnalysis
 from .plugins.factor_analysis import FactorAnalysisPlugin
 from .plugins.independent_component_analysis import IndependentComponentAnalysis
 from .plugins.quadratic_discriminant_analysis import QuadraticDiscriminantAnalysis
+from .plugins.truncated_svd_analysis import TruncatedSVDAnalysis
+from .plugins.apriori_analysis import AprioriAnalysis
 
 
 class AnalysisEngine:
@@ -83,6 +85,8 @@ class AnalysisEngine:
         self.registry.register(FactorAnalysisPlugin())
         self.registry.register(IndependentComponentAnalysis())
         self.registry.register(QuadraticDiscriminantAnalysis())
+        self.registry.register(TruncatedSVDAnalysis())
+        self.registry.register(AprioriAnalysis())
 
     def analyze(
         self,

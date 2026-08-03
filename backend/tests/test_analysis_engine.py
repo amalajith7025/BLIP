@@ -17,6 +17,8 @@ from app.analysis.plugins.birch_analysis import BirchAnalysis
 from app.analysis.plugins.factor_analysis import FactorAnalysisPlugin
 from app.analysis.plugins.independent_component_analysis import IndependentComponentAnalysis
 from app.analysis.plugins.quadratic_discriminant_analysis import QuadraticDiscriminantAnalysis
+from app.analysis.plugins.truncated_svd_analysis import TruncatedSVDAnalysis
+from app.analysis.plugins.apriori_analysis import AprioriAnalysis
 
 
 def test_profiler_generates_dataset_profile():
@@ -80,6 +82,10 @@ def test_plugin_selection_includes_all_applicable_plugins():
         expected_names.add("Independent Component Analysis")
     if QuadraticDiscriminantAnalysis().validate(profile):
         expected_names.add("Quadratic Discriminant Analysis")
+    if TruncatedSVDAnalysis().validate(profile):
+        expected_names.add("Truncated SVD")
+    if AprioriAnalysis().validate(profile):
+        expected_names.add("Apriori Association")
 
     assert applicable_names == expected_names
 

@@ -33,6 +33,8 @@ from .plugins.extra_trees_analysis import ExtraTreesAnalysis
 from .plugins.linear_discriminant_analysis import LinearDiscriminantAnalysis
 from .plugins.mean_shift_analysis import MeanShiftAnalysis
 from .plugins.spectral_clustering_analysis import SpectralClusteringAnalysis
+from .plugins.optics_analysis import OPTICSAnalysis
+from .plugins.birch_analysis import BirchAnalysis
 from .plugins.quadratic_discriminant_analysis import QuadraticDiscriminantAnalysis
 
 
@@ -74,6 +76,8 @@ class AnalysisEngine:
         self.registry.register(LinearDiscriminantAnalysis())
         self.registry.register(MeanShiftAnalysis())
         self.registry.register(SpectralClusteringAnalysis())
+        self.registry.register(OPTICSAnalysis())
+        self.registry.register(BirchAnalysis())
         self.registry.register(QuadraticDiscriminantAnalysis())
 
     def analyze(

@@ -12,6 +12,8 @@ from app.analysis.plugins.extra_trees_analysis import ExtraTreesAnalysis
 from app.analysis.plugins.linear_discriminant_analysis import LinearDiscriminantAnalysis
 from app.analysis.plugins.mean_shift_analysis import MeanShiftAnalysis
 from app.analysis.plugins.spectral_clustering_analysis import SpectralClusteringAnalysis
+from app.analysis.plugins.optics_analysis import OPTICSAnalysis
+from app.analysis.plugins.birch_analysis import BirchAnalysis
 from app.analysis.plugins.quadratic_discriminant_analysis import QuadraticDiscriminantAnalysis
 
 
@@ -66,6 +68,10 @@ def test_plugin_selection_includes_all_applicable_plugins():
         expected_names.add("Mean Shift Clustering")
     if SpectralClusteringAnalysis().validate(profile):
         expected_names.add("Spectral Clustering")
+    if OPTICSAnalysis().validate(profile):
+        expected_names.add("OPTICS Clustering")
+    if BirchAnalysis().validate(profile):
+        expected_names.add("Birch Clustering")
     if QuadraticDiscriminantAnalysis().validate(profile):
         expected_names.add("Quadratic Discriminant Analysis")
 

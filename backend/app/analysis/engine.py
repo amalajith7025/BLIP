@@ -8,6 +8,7 @@ from .registry import AnalysisRegistry
 from .plugins.descriptive_statistics import DescriptiveStatistics
 from .plugins.frequency_distribution import FrequencyDistribution
 from .plugins.pareto_analysis import ParetoAnalysis
+from .plugins.correlation_analysis import CorrelationAnalysis
 
 
 class AnalysisEngine:
@@ -23,6 +24,7 @@ class AnalysisEngine:
         self.registry.register(DescriptiveStatistics())
         self.registry.register(FrequencyDistribution())
         self.registry.register(ParetoAnalysis())
+        self.registry.register(CorrelationAnalysis())
 
     def analyze(
         self,

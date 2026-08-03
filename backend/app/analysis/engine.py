@@ -31,6 +31,8 @@ from .plugins.gradient_boosting_analysis import GradientBoostingAnalysis
 from .plugins.adaboost_analysis import AdaBoostAnalysis
 from .plugins.extra_trees_analysis import ExtraTreesAnalysis
 from .plugins.linear_discriminant_analysis import LinearDiscriminantAnalysis
+from .plugins.mean_shift_analysis import MeanShiftAnalysis
+from .plugins.spectral_clustering_analysis import SpectralClusteringAnalysis
 from .plugins.quadratic_discriminant_analysis import QuadraticDiscriminantAnalysis
 
 
@@ -70,6 +72,8 @@ class AnalysisEngine:
         self.registry.register(AdaBoostAnalysis())
         self.registry.register(ExtraTreesAnalysis())
         self.registry.register(LinearDiscriminantAnalysis())
+        self.registry.register(MeanShiftAnalysis())
+        self.registry.register(SpectralClusteringAnalysis())
         self.registry.register(QuadraticDiscriminantAnalysis())
 
     def analyze(

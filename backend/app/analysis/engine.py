@@ -18,6 +18,7 @@ from .plugins.normality_analysis import NormalityAnalysis
 from .plugins.kruskal_wallis_analysis import KruskalWallisAnalysis
 from .plugins.pca_analysis import PCAAnalysis
 from .plugins.kmeans_analysis import KMeansAnalysis
+from .plugins.hierarchical_clustering_analysis import HierarchicalClusteringAnalysis
 
 
 class AnalysisEngine:
@@ -43,6 +44,7 @@ class AnalysisEngine:
         self.registry.register(KruskalWallisAnalysis())
         self.registry.register(PCAAnalysis())
         self.registry.register(KMeansAnalysis())
+        self.registry.register(HierarchicalClusteringAnalysis())
 
     def analyze(
         self,

@@ -23,6 +23,7 @@ from .plugins.dbscan_analysis import DBSCANAnalysis
 from .plugins.gaussian_mixture_analysis import GaussianMixtureAnalysis
 from .plugins.logistic_regression_analysis import LogisticRegressionAnalysis
 from .plugins.decision_tree_analysis import DecisionTreeAnalysis
+from .plugins.random_forest_analysis import RandomForestAnalysis
 
 
 class AnalysisEngine:
@@ -53,6 +54,7 @@ class AnalysisEngine:
         self.registry.register(GaussianMixtureAnalysis())
         self.registry.register(LogisticRegressionAnalysis())
         self.registry.register(DecisionTreeAnalysis())
+        self.registry.register(RandomForestAnalysis())
 
     def analyze(
         self,

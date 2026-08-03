@@ -2,6 +2,7 @@ import pandas as pd
 
 from app.analysis.engine import AnalysisEngine
 from app.analysis.profiler import DataProfiler
+from app.analysis.plugins.random_forest_analysis import RandomForestAnalysis
 
 
 def test_profiler_generates_dataset_profile():
@@ -24,7 +25,7 @@ def test_plugin_selection_includes_all_applicable_plugins():
 
     applicable_names = {plugin.name for plugin in engine.registry.applicable(profile)}
 
-    assert applicable_names == {
+    expected_names = {
         "Descriptive Statistics",
         "Frequency Distribution",
         "Pareto Analysis",
@@ -34,6 +35,11 @@ def test_plugin_selection_includes_all_applicable_plugins():
         "Kruskal-Wallis Analysis",
         "Decision Tree",
     }
+
+    if RandomForestAnalysis().validate(profile):
+        expected_names.add("Random Forest")
+
+    assert applicable_names == expected_names
 
 
 def test_analyze_executes_multiple_plugins_for_categorical_dataset():

@@ -24,6 +24,7 @@ from .plugins.gaussian_mixture_analysis import GaussianMixtureAnalysis
 from .plugins.logistic_regression_analysis import LogisticRegressionAnalysis
 from .plugins.decision_tree_analysis import DecisionTreeAnalysis
 from .plugins.random_forest_analysis import RandomForestAnalysis
+from .plugins.support_vector_machine_analysis import SupportVectorMachineAnalysis
 
 
 class AnalysisEngine:
@@ -55,6 +56,7 @@ class AnalysisEngine:
         self.registry.register(LogisticRegressionAnalysis())
         self.registry.register(DecisionTreeAnalysis())
         self.registry.register(RandomForestAnalysis())
+        self.registry.register(SupportVectorMachineAnalysis())
 
     def analyze(
         self,

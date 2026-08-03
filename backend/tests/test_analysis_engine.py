@@ -3,6 +3,7 @@ import pandas as pd
 from app.analysis.engine import AnalysisEngine
 from app.analysis.profiler import DataProfiler
 from app.analysis.plugins.random_forest_analysis import RandomForestAnalysis
+from app.analysis.plugins.support_vector_machine_analysis import SupportVectorMachineAnalysis
 
 
 def test_profiler_generates_dataset_profile():
@@ -38,6 +39,8 @@ def test_plugin_selection_includes_all_applicable_plugins():
 
     if RandomForestAnalysis().validate(profile):
         expected_names.add("Random Forest")
+    if SupportVectorMachineAnalysis().validate(profile):
+        expected_names.add("Support Vector Machine")
 
     assert applicable_names == expected_names
 

@@ -26,8 +26,16 @@ class AnalysisRegistry:
         profile: DatasetProfile,
     ) -> List[AnalysisPlugin]:
 
-        return [
-            plugin
-            for plugin in self._plugins.values()
-            if plugin.validate(profile)
-        ]
+        applicable_plugins = []
+
+        for plugin in self._plugins.values():
+            if not plugin.validate(profile):
+                continue
+
+            minimum_samples = getattr(plugin, "minimum_samples", None)
+            if minimum_samples is not None and profile.rows < minimum_samples:
+                continue
+
+            applicable_plugins.append(plugin)
+
+        return applicable_plugins

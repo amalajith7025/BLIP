@@ -29,6 +29,7 @@ from .plugins.naive_bayes_analysis import NaiveBayesAnalysis
 from .plugins.knn_analysis import KNNAnalysis
 from .plugins.gradient_boosting_analysis import GradientBoostingAnalysis
 from .plugins.adaboost_analysis import AdaBoostAnalysis
+from .plugins.extra_trees_analysis import ExtraTreesAnalysis
 
 
 class AnalysisEngine:
@@ -65,6 +66,7 @@ class AnalysisEngine:
         self.registry.register(KNNAnalysis())
         self.registry.register(GradientBoostingAnalysis())
         self.registry.register(AdaBoostAnalysis())
+        self.registry.register(ExtraTreesAnalysis())
 
     def analyze(
         self,

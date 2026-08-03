@@ -27,6 +27,7 @@ from .plugins.random_forest_analysis import RandomForestAnalysis
 from .plugins.support_vector_machine_analysis import SupportVectorMachineAnalysis
 from .plugins.naive_bayes_analysis import NaiveBayesAnalysis
 from .plugins.knn_analysis import KNNAnalysis
+from .plugins.gradient_boosting_analysis import GradientBoostingAnalysis
 
 
 class AnalysisEngine:
@@ -61,6 +62,7 @@ class AnalysisEngine:
         self.registry.register(SupportVectorMachineAnalysis())
         self.registry.register(NaiveBayesAnalysis())
         self.registry.register(KNNAnalysis())
+        self.registry.register(GradientBoostingAnalysis())
 
     def analyze(
         self,

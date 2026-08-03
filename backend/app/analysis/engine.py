@@ -20,6 +20,7 @@ from .plugins.pca_analysis import PCAAnalysis
 from .plugins.kmeans_analysis import KMeansAnalysis
 from .plugins.hierarchical_clustering_analysis import HierarchicalClusteringAnalysis
 from .plugins.dbscan_analysis import DBSCANAnalysis
+from .plugins.gaussian_mixture_analysis import GaussianMixtureAnalysis
 
 
 class AnalysisEngine:
@@ -47,6 +48,7 @@ class AnalysisEngine:
         self.registry.register(KMeansAnalysis())
         self.registry.register(HierarchicalClusteringAnalysis())
         self.registry.register(DBSCANAnalysis())
+        self.registry.register(GaussianMixtureAnalysis())
 
     def analyze(
         self,

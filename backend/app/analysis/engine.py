@@ -22,6 +22,7 @@ from .plugins.hierarchical_clustering_analysis import HierarchicalClusteringAnal
 from .plugins.dbscan_analysis import DBSCANAnalysis
 from .plugins.gaussian_mixture_analysis import GaussianMixtureAnalysis
 from .plugins.logistic_regression_analysis import LogisticRegressionAnalysis
+from .plugins.decision_tree_analysis import DecisionTreeAnalysis
 
 
 class AnalysisEngine:
@@ -51,6 +52,7 @@ class AnalysisEngine:
         self.registry.register(DBSCANAnalysis())
         self.registry.register(GaussianMixtureAnalysis())
         self.registry.register(LogisticRegressionAnalysis())
+        self.registry.register(DecisionTreeAnalysis())
 
     def analyze(
         self,

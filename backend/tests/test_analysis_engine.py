@@ -32,6 +32,7 @@ def test_plugin_selection_includes_all_applicable_plugins():
         "T-Test Analysis",
         "Normality Analysis",
         "Kruskal-Wallis Analysis",
+        "Decision Tree",
     }
 
 

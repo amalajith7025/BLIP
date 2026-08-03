@@ -40,6 +40,7 @@ from .plugins.independent_component_analysis import IndependentComponentAnalysis
 from .plugins.quadratic_discriminant_analysis import QuadraticDiscriminantAnalysis
 from .plugins.truncated_svd_analysis import TruncatedSVDAnalysis
 from .plugins.apriori_analysis import AprioriAnalysis
+from .plugins.fpgrowth_analysis import FPGrowthAnalysis
 
 
 class AnalysisEngine:
@@ -87,6 +88,7 @@ class AnalysisEngine:
         self.registry.register(QuadraticDiscriminantAnalysis())
         self.registry.register(TruncatedSVDAnalysis())
         self.registry.register(AprioriAnalysis())
+        self.registry.register(FPGrowthAnalysis())
 
     def analyze(
         self,

@@ -19,6 +19,7 @@ from app.analysis.plugins.independent_component_analysis import IndependentCompo
 from app.analysis.plugins.quadratic_discriminant_analysis import QuadraticDiscriminantAnalysis
 from app.analysis.plugins.truncated_svd_analysis import TruncatedSVDAnalysis
 from app.analysis.plugins.apriori_analysis import AprioriAnalysis
+from app.analysis.plugins.fpgrowth_analysis import FPGrowthAnalysis
 
 
 def test_profiler_generates_dataset_profile():
@@ -86,6 +87,8 @@ def test_plugin_selection_includes_all_applicable_plugins():
         expected_names.add("Truncated SVD")
     if AprioriAnalysis().validate(profile):
         expected_names.add("Apriori Association")
+    if FPGrowthAnalysis().validate(profile):
+        expected_names.add("FP-Growth Analysis")
 
     assert applicable_names == expected_names
 

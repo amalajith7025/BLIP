@@ -7,6 +7,7 @@ from app.analysis.plugins.support_vector_machine_analysis import SupportVectorMa
 from app.analysis.plugins.naive_bayes_analysis import NaiveBayesAnalysis
 from app.analysis.plugins.knn_analysis import KNNAnalysis
 from app.analysis.plugins.gradient_boosting_analysis import GradientBoostingAnalysis
+from app.analysis.plugins.adaboost_analysis import AdaBoostAnalysis
 
 
 def test_profiler_generates_dataset_profile():
@@ -50,6 +51,8 @@ def test_plugin_selection_includes_all_applicable_plugins():
         expected_names.add("K-Nearest Neighbors")
     if GradientBoostingAnalysis().validate(profile):
         expected_names.add("Gradient Boosting")
+    if AdaBoostAnalysis().validate(profile):
+        expected_names.add("AdaBoost")
 
     assert applicable_names == expected_names
 

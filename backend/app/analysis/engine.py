@@ -28,6 +28,7 @@ from .plugins.support_vector_machine_analysis import SupportVectorMachineAnalysi
 from .plugins.naive_bayes_analysis import NaiveBayesAnalysis
 from .plugins.knn_analysis import KNNAnalysis
 from .plugins.gradient_boosting_analysis import GradientBoostingAnalysis
+from .plugins.adaboost_analysis import AdaBoostAnalysis
 
 
 class AnalysisEngine:
@@ -63,6 +64,7 @@ class AnalysisEngine:
         self.registry.register(NaiveBayesAnalysis())
         self.registry.register(KNNAnalysis())
         self.registry.register(GradientBoostingAnalysis())
+        self.registry.register(AdaBoostAnalysis())
 
     def analyze(
         self,

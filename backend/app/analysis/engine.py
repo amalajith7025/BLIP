@@ -13,6 +13,7 @@ from .plugins.regression_analysis import RegressionAnalysis
 from .plugins.outlier_detection import OutlierDetection
 from .plugins.ttest_analysis import TTestAnalysis
 from .plugins.chi_square_analysis import ChiSquareAnalysis
+from .plugins.anova_analysis import AnovaAnalysis
 
 
 class AnalysisEngine:
@@ -33,6 +34,7 @@ class AnalysisEngine:
         self.registry.register(OutlierDetection())
         self.registry.register(TTestAnalysis())
         self.registry.register(ChiSquareAnalysis())
+        self.registry.register(AnovaAnalysis())
 
     def analyze(
         self,

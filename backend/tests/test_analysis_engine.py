@@ -10,6 +10,7 @@ from app.analysis.plugins.gradient_boosting_analysis import GradientBoostingAnal
 from app.analysis.plugins.adaboost_analysis import AdaBoostAnalysis
 from app.analysis.plugins.extra_trees_analysis import ExtraTreesAnalysis
 from app.analysis.plugins.linear_discriminant_analysis import LinearDiscriminantAnalysis
+from app.analysis.plugins.quadratic_discriminant_analysis import QuadraticDiscriminantAnalysis
 
 
 def test_profiler_generates_dataset_profile():
@@ -59,6 +60,8 @@ def test_plugin_selection_includes_all_applicable_plugins():
         expected_names.add("Extra Trees")
     if LinearDiscriminantAnalysis().validate(profile):
         expected_names.add("Linear Discriminant Analysis")
+    if QuadraticDiscriminantAnalysis().validate(profile):
+        expected_names.add("Quadratic Discriminant Analysis")
 
     assert applicable_names == expected_names
 

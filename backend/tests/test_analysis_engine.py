@@ -5,6 +5,7 @@ from app.analysis.profiler import DataProfiler
 from app.analysis.plugins.random_forest_analysis import RandomForestAnalysis
 from app.analysis.plugins.support_vector_machine_analysis import SupportVectorMachineAnalysis
 from app.analysis.plugins.naive_bayes_analysis import NaiveBayesAnalysis
+from app.analysis.plugins.knn_analysis import KNNAnalysis
 
 
 def test_profiler_generates_dataset_profile():
@@ -44,6 +45,8 @@ def test_plugin_selection_includes_all_applicable_plugins():
         expected_names.add("Support Vector Machine")
     if NaiveBayesAnalysis().validate(profile):
         expected_names.add("Naive Bayes")
+    if KNNAnalysis().validate(profile):
+        expected_names.add("K-Nearest Neighbors")
 
     assert applicable_names == expected_names
 

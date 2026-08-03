@@ -31,6 +31,7 @@ def test_plugin_selection_includes_all_applicable_plugins():
         "Outlier Detection",
         "T-Test Analysis",
         "Normality Analysis",
+        "Kruskal-Wallis Analysis",
     }
 
 

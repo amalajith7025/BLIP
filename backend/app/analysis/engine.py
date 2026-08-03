@@ -15,6 +15,7 @@ from .plugins.ttest_analysis import TTestAnalysis
 from .plugins.chi_square_analysis import ChiSquareAnalysis
 from .plugins.anova_analysis import AnovaAnalysis
 from .plugins.normality_analysis import NormalityAnalysis
+from .plugins.kruskal_wallis_analysis import KruskalWallisAnalysis
 
 
 class AnalysisEngine:
@@ -37,6 +38,7 @@ class AnalysisEngine:
         self.registry.register(ChiSquareAnalysis())
         self.registry.register(AnovaAnalysis())
         self.registry.register(NormalityAnalysis())
+        self.registry.register(KruskalWallisAnalysis())
 
     def analyze(
         self,

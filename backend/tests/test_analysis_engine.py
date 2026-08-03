@@ -28,6 +28,7 @@ def test_plugin_selection_includes_all_applicable_plugins():
         "Descriptive Statistics",
         "Frequency Distribution",
         "Pareto Analysis",
+        "Outlier Detection",
     }
 
 

@@ -10,6 +10,7 @@ from .plugins.frequency_distribution import FrequencyDistribution
 from .plugins.pareto_analysis import ParetoAnalysis
 from .plugins.correlation_analysis import CorrelationAnalysis
 from .plugins.regression_analysis import RegressionAnalysis
+from .plugins.outlier_detection import OutlierDetection
 
 
 class AnalysisEngine:
@@ -27,6 +28,7 @@ class AnalysisEngine:
         self.registry.register(ParetoAnalysis())
         self.registry.register(CorrelationAnalysis())
         self.registry.register(RegressionAnalysis())
+        self.registry.register(OutlierDetection())
 
     def analyze(
         self,

@@ -16,6 +16,7 @@ from .plugins.chi_square_analysis import ChiSquareAnalysis
 from .plugins.anova_analysis import AnovaAnalysis
 from .plugins.normality_analysis import NormalityAnalysis
 from .plugins.kruskal_wallis_analysis import KruskalWallisAnalysis
+from .plugins.pca_analysis import PCAAnalysis
 
 
 class AnalysisEngine:
@@ -39,6 +40,7 @@ class AnalysisEngine:
         self.registry.register(AnovaAnalysis())
         self.registry.register(NormalityAnalysis())
         self.registry.register(KruskalWallisAnalysis())
+        self.registry.register(PCAAnalysis())
 
     def analyze(
         self,

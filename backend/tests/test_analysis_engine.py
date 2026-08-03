@@ -9,6 +9,7 @@ from app.analysis.plugins.knn_analysis import KNNAnalysis
 from app.analysis.plugins.gradient_boosting_analysis import GradientBoostingAnalysis
 from app.analysis.plugins.adaboost_analysis import AdaBoostAnalysis
 from app.analysis.plugins.extra_trees_analysis import ExtraTreesAnalysis
+from app.analysis.plugins.linear_discriminant_analysis import LinearDiscriminantAnalysis
 
 
 def test_profiler_generates_dataset_profile():
@@ -56,6 +57,8 @@ def test_plugin_selection_includes_all_applicable_plugins():
         expected_names.add("AdaBoost")
     if ExtraTreesAnalysis().validate(profile):
         expected_names.add("Extra Trees")
+    if LinearDiscriminantAnalysis().validate(profile):
+        expected_names.add("Linear Discriminant Analysis")
 
     assert applicable_names == expected_names
 

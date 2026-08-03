@@ -30,6 +30,7 @@ from .plugins.knn_analysis import KNNAnalysis
 from .plugins.gradient_boosting_analysis import GradientBoostingAnalysis
 from .plugins.adaboost_analysis import AdaBoostAnalysis
 from .plugins.extra_trees_analysis import ExtraTreesAnalysis
+from .plugins.linear_discriminant_analysis import LinearDiscriminantAnalysis
 
 
 class AnalysisEngine:
@@ -67,6 +68,7 @@ class AnalysisEngine:
         self.registry.register(GradientBoostingAnalysis())
         self.registry.register(AdaBoostAnalysis())
         self.registry.register(ExtraTreesAnalysis())
+        self.registry.register(LinearDiscriminantAnalysis())
 
     def analyze(
         self,

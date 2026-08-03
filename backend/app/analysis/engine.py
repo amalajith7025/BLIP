@@ -35,6 +35,8 @@ from .plugins.mean_shift_analysis import MeanShiftAnalysis
 from .plugins.spectral_clustering_analysis import SpectralClusteringAnalysis
 from .plugins.optics_analysis import OPTICSAnalysis
 from .plugins.birch_analysis import BirchAnalysis
+from .plugins.factor_analysis import FactorAnalysisPlugin
+from .plugins.independent_component_analysis import IndependentComponentAnalysis
 from .plugins.quadratic_discriminant_analysis import QuadraticDiscriminantAnalysis
 
 
@@ -78,6 +80,8 @@ class AnalysisEngine:
         self.registry.register(SpectralClusteringAnalysis())
         self.registry.register(OPTICSAnalysis())
         self.registry.register(BirchAnalysis())
+        self.registry.register(FactorAnalysisPlugin())
+        self.registry.register(IndependentComponentAnalysis())
         self.registry.register(QuadraticDiscriminantAnalysis())
 
     def analyze(

@@ -140,30 +140,32 @@ class DescriptiveStatistics(AnalysisPlugin):
             "missing_values": "Number of missing observations in the column.",
         }
 
-    def observations(self, results: Dict[str, Dict[str, Any]]) -> List[str]:
+    def observations(self, results: Dict[str, Dict[str, Any]]) -> Dict[str, List[str]]:
         """Generate objective observations from statistical results.
 
         Observations are concise, avoid business interpretation and recommendations.
         """
-        obs: List[str] = []
+        grouped: Dict[str, List[str]] = {}
 
         for col, metrics in results.items():
+            col_obs: List[str] = []
             count = metrics.get("count")
             missing = metrics.get("missing_values", 0)
 
             # Missing values observations
             if count == 0:
-                obs.append(f"{col}: No non-missing values available for analysis.")
+                col_obs.append(f"{col}: No non-missing values available for analysis.")
+                grouped[col] = col_obs
                 continue
 
             if missing == 0:
-                obs.append(f"{col}: No missing values detected.")
+                col_obs.append(f"{col}: No missing values detected.")
             else:
                 total = count + missing
                 if total > 0 and (missing / total) > 0.2:
-                    obs.append(f"{col}: Large number of missing values detected.")
+                    col_obs.append(f"{col}: Large number of missing values detected.")
                 else:
-                    obs.append(f"{col}: Some missing values detected.")
+                    col_obs.append(f"{col}: Some missing values detected.")
 
             mean = metrics.get("mean")
             median = metrics.get("median")
@@ -173,17 +175,24 @@ class DescriptiveStatistics(AnalysisPlugin):
             if mean not in (None, 0) and std_dev is not None:
                 cov = abs(std_dev / (abs(mean) + 1e-12))
                 if cov < 0.1:
-                    obs.append(f"{col}: Values are tightly clustered around the average.")
+                    col_obs.append(f"{col}: Values are tightly clustered around the average.")
                 elif cov > 1:
-                    obs.append(f"{col}: Values show high variability.")
+                    col_obs.append(f"{col}: Values show high variability.")
 
             if mean is not None and median is not None:
                 if abs(mean - median) / (abs(mean) + 1e-12) < 0.05:
-                    obs.append(f"{col}: Distribution appears symmetric.")
+                    col_obs.append(f"{col}: Distribution appears symmetric.")
                 else:
-                    obs.append(f"{col}: Mean differs substantially from median.")
+                    col_obs.append(f"{col}: Mean differs substantially from median.")
 
-            grouped[col] = obs
+            grouped[col] = col_obs
 
         return grouped
+
+    @staticmethod
+    def _to_scalar(value: Any) -> Any:
+        """Convert numpy scalar to native Python scalar when possible."""
+        if isinstance(value, np.generic):
+            return value.item()
+        return value
 

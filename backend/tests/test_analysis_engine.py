@@ -29,6 +29,7 @@ def test_plugin_selection_includes_all_applicable_plugins():
         "Frequency Distribution",
         "Pareto Analysis",
         "Outlier Detection",
+        "T-Test Analysis",
     }
 
 

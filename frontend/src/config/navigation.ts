@@ -1,0 +1,1 @@
+export const navigationItems: Array<{ label: string; href: string }> = [];

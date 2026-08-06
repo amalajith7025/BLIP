@@ -1,5 +1,6 @@
 from dataclasses import dataclass, field
 
+from app.findings.schemas import FindingCollection
 from app.investigation_framework.schemas import InvestigationStatus, StageStatus
 from app.planning.schemas import PlanningResult, SkippedCapability
 
@@ -32,6 +33,7 @@ class InvestigationResult:
     execution_summary: InvestigationExecutionSummary | None = None
     executed_capabilities: list[ExecutedCapabilityResult] = field(default_factory=list)
     skipped_capabilities: list[SkippedCapability] = field(default_factory=list)
+    findings_collection: FindingCollection | None = None
     analysis_results: dict[str, dict] = field(default_factory=dict)
     execution_duration_ms: float = 0.0
     warnings: list[str] = field(default_factory=list)

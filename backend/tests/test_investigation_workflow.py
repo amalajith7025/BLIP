@@ -67,6 +67,8 @@ def test_successful_investigation_execution():
 
     assert result.execution_summary is not None
     assert result.execution_summary.total_executed >= 1
+    assert result.findings_collection is not None
+    assert result.findings_collection.investigation_id
     assert result.analysis_results
     assert result.confidence > 0
     assert result.execution_duration_ms >= 0
@@ -91,6 +93,8 @@ def test_unsupported_dataset_returns_skips_and_warnings():
 
     assert result.execution_summary is not None
     assert result.execution_summary.total_executed == 0
+    assert result.findings_collection is not None
+    assert result.findings_collection.findings == []
     assert result.skipped_capabilities
     assert any("No required capabilities are executable" in warning for warning in result.warnings)
 

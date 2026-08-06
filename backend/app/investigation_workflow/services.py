@@ -9,6 +9,7 @@ from app.analysis.capabilities.services import build_default_capability_registry
 from app.analysis.engine import AnalysisEngine
 from app.analysis.schemas import DatasetProfile
 from app.business_goals.schemas import BusinessGoal
+from app.findings.services import FindingsBuilderService
 from app.investigation_framework.interfaces import InvestigationStageExecutor
 from app.investigation_framework.registry import StageExecutorRegistry
 from app.investigation_framework.schemas import (
@@ -175,6 +176,7 @@ class InvestigationWorkflowService:
         framework: InvestigationOrchestrationService | None = None,
         analysis_engine: AnalysisEngine | None = None,
         capability_registry: AnalysisCapabilityRegistry | None = None,
+        findings_builder: FindingsBuilderService | None = None,
     ):
         self.capability_registry = capability_registry or build_default_capability_registry()
         self.analysis_engine = analysis_engine or AnalysisEngine()
@@ -182,6 +184,7 @@ class InvestigationWorkflowService:
             capability_registry=self.capability_registry,
         )
         self.framework = framework or self._build_framework()
+        self.findings_builder = findings_builder or FindingsBuilderService()
 
     def execute_investigation(
         self,
@@ -242,11 +245,18 @@ class InvestigationWorkflowService:
             total_skipped=total_skipped,
         )
 
-        return InvestigationResult(
+        missing_values = sum(column.missing_values for column in dataset_profile.column_profiles)
+        total_cells = dataset_profile.rows * max(1, dataset_profile.columns)
+        missing_ratio = (missing_values / total_cells) if total_cells > 0 else 1.0
+
+        base_result = InvestigationResult(
             investigation_metadata={
                 "goal_id": business_goal.goal_id,
                 "goal_name": business_goal.name,
                 "dataset_name": dataset_profile.name,
+                "dataset_rows": str(dataset_profile.rows),
+                "dataset_columns": str(dataset_profile.columns),
+                "dataset_missing_ratio": str(round(missing_ratio, 6)),
                 "workflow_version": "1.0.0",
             },
             execution_summary=summary,
@@ -257,6 +267,21 @@ class InvestigationWorkflowService:
             warnings=warnings,
             planner_decisions=planning_result,
             confidence=planning_result.planner_confidence,
+        )
+
+        findings_collection = self.findings_builder.build(base_result)
+
+        return InvestigationResult(
+            investigation_metadata=base_result.investigation_metadata,
+            execution_summary=base_result.execution_summary,
+            executed_capabilities=base_result.executed_capabilities,
+            skipped_capabilities=base_result.skipped_capabilities,
+            findings_collection=findings_collection,
+            analysis_results=base_result.analysis_results,
+            execution_duration_ms=base_result.execution_duration_ms,
+            warnings=base_result.warnings,
+            planner_decisions=base_result.planner_decisions,
+            confidence=base_result.confidence,
         )
 
     def _build_framework(self) -> InvestigationOrchestrationService:

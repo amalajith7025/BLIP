@@ -108,3 +108,17 @@ from .workspace import (
     WorkspaceResponse,
     WorkspaceListResponse,
 )
+
+from .investigation_pipeline import (
+    DatasetUploadResponse,
+    SemanticColumnResponse,
+    SemanticProfileResponse,
+    BusinessGoalResponse,
+    StartInvestigationRequest,
+    StartInvestigationResponse,
+    InvestigationStatusResponse,
+    FindingEvidenceResponse,
+    FindingResponse,
+    FindingCollectionResponse,
+    InvestigationFindingsResponse,
+)

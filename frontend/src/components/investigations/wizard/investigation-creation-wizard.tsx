@@ -1,204 +1,225 @@
 "use client"
 
-import { useEffect, useMemo, useRef, useState } from "react"
-import { ArrowLeft, ArrowRight, CheckCircle2 } from "lucide-react"
-import { useRouter } from "next/navigation"
+import { useEffect, useMemo, useState } from "react"
+import { ArrowLeft, ArrowRight, CheckCircle2, LoaderCircle } from "lucide-react"
 
-import { ConnectionMappingTable, type ConnectionRow, type MappingChoice } from "@/components/datasets/connection-mapping-table"
 import { FileUploadZone } from "@/components/datasets/file-upload-zone"
-import { InformationHealthSummary, type HealthIssue } from "@/components/datasets/information-health-summary"
-import { DatasetPreviewTable } from "@/components/datasets/dataset-preview-table"
-import { mockPreviewRows } from "@/components/datasets/mock-preview"
-import type { DatasetRecord } from "@/components/datasets/types"
 import { UploadProgress } from "@/components/datasets/upload-progress"
 import { PageContainer } from "@/components/common/page-container"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
+import {
+  type BusinessGoalResponse,
+  type InvestigationFindingsResponse,
+  type InvestigationStatusResponse,
+  type SemanticProfileResponse,
+  generateSemanticProfile,
+  getBusinessGoals,
+  getInvestigationFindings,
+  getInvestigationStatus,
+  startInvestigation,
+  uploadDataset,
+} from "@/services/investigation-api"
 
-type Audience = "me" | "team" | "leadership" | "client"
-type Goal = "understand" | "explain" | "predict" | "improve"
-type InformationSource = "csv" | "excel" | "database" | "nothing"
-type UploadPhase = "select" | "uploading" | "success"
+type UploadPhase = "select" | "uploading" | "success" | "error"
 
 const chapters = [
-  "Question",
-  "Context",
-  "Information",
-  "Upload",
-  "Understanding",
-  "Connecting",
-  "Ready",
+  "Upload Dataset",
+  "Semantic Profile",
+  "Choose Business Goal",
+  "Run Investigation",
+  "Execution Progress",
+  "Findings",
 ]
-
-const questionExamples = [
-  "What is driving lower renewal rates in enterprise accounts this quarter?",
-  "Where are we seeing delays in our service delivery process?",
-  "Which customer groups respond best to our latest pricing updates?",
-]
-
-const audienceOptions: Array<{ value: Audience; label: string }> = [
-  { value: "me", label: "Me" },
-  { value: "team", label: "My Team" },
-  { value: "leadership", label: "Leadership" },
-  { value: "client", label: "Client" },
-]
-
-const goalOptions: Array<{ value: Goal; label: string }> = [
-  { value: "understand", label: "Understand" },
-  { value: "explain", label: "Explain" },
-  { value: "predict", label: "Predict" },
-  { value: "improve", label: "Improve" },
-]
-
-const infoOptions: Array<{ value: InformationSource; label: string; description: string }> = [
-  { value: "csv", label: "CSV", description: "A comma-separated file." },
-  { value: "excel", label: "Excel", description: "An .xlsx or .xls workbook." },
-  { value: "database", label: "Database", description: "A connected table or export." },
-  { value: "nothing", label: "Nothing yet", description: "We can still continue." },
-]
-
-const defaultMappings: ConnectionRow[] = [
-  { id: "m1", sourceField: "Order Date", suggestedMatch: "Date", confidence: 97, choice: "date" },
-  { id: "m2", sourceField: "Region", suggestedMatch: "Region", confidence: 94, choice: "region" },
-  { id: "m3", sourceField: "Customer", suggestedMatch: "Account", confidence: 88, choice: "account" },
-  { id: "m4", sourceField: "Product Family", suggestedMatch: "Product", confidence: 84, choice: "product" },
-  { id: "m5", sourceField: "Revenue", suggestedMatch: "Value", confidence: 98, choice: "value" },
-]
-
-function formatUploadDate() {
-  return new Date().toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  })
-}
-
-function informationIssues(hasDataset: boolean): HealthIssue[] {
-  if (!hasDataset) {
-    return [
-      {
-        id: "h1",
-        label: "No information added yet",
-        detail: "You can continue now and add information later when it is available.",
-        whyItMatters: "Having information in place helps us prepare clearer findings sooner.",
-        severity: "low",
-      },
-    ]
-  }
-
-  return [
-    {
-      id: "h2",
-      label: "A few dates use mixed formats",
-      detail: "Most rows use YYYY-MM-DD, while a small group uses MM/DD/YYYY.",
-      whyItMatters: "Consistent dates help ensure timelines and comparisons remain accurate.",
-      severity: "medium",
-    },
-    {
-      id: "h3",
-      label: "Some records are missing region",
-      detail: "38 rows do not include a region value.",
-      whyItMatters: "Region gaps can hide patterns when comparing performance across locations.",
-      severity: "medium",
-    },
-  ]
-}
 
 export function InvestigationCreationWizard() {
-  const router = useRouter()
   const [step, setStep] = useState(0)
-  const [question, setQuestion] = useState("")
-  const [audience, setAudience] = useState<Audience | null>(null)
-  const [goal, setGoal] = useState<Goal | null>(null)
-  const [informationSource, setInformationSource] = useState<InformationSource | null>(null)
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [uploadPhase, setUploadPhase] = useState<UploadPhase>("select")
   const [uploadProgress, setUploadProgress] = useState(0)
-  const [dataset, setDataset] = useState<DatasetRecord | null>(null)
-  const [mappingRows, setMappingRows] = useState<ConnectionRow[]>(defaultMappings)
-  const timerRef = useRef<number | null>(null)
-
-  useEffect(() => {
-    return () => {
-      if (timerRef.current !== null) {
-        window.clearInterval(timerRef.current)
-      }
-    }
-  }, [])
+  const [datasetId, setDatasetId] = useState<string | null>(null)
+  const [semanticProfile, setSemanticProfile] = useState<SemanticProfileResponse | null>(null)
+  const [goals, setGoals] = useState<BusinessGoalResponse[]>([])
+  const [selectedGoalId, setSelectedGoalId] = useState<string | null>(null)
+  const [investigationId, setInvestigationId] = useState<string | null>(null)
+  const [status, setStatus] = useState<InvestigationStatusResponse | null>(null)
+  const [findings, setFindings] = useState<InvestigationFindingsResponse | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const completion = useMemo(() => Math.round(((step + 1) / chapters.length) * 100), [step])
 
-  function startUpload(file: File) {
-    if (timerRef.current !== null) {
-      window.clearInterval(timerRef.current)
+  useEffect(() => {
+    if (step !== 4 || !investigationId) {
+      return
     }
 
-    setUploadPhase("uploading")
-    setUploadProgress(0)
-
-    timerRef.current = window.setInterval(() => {
-      setUploadProgress((current) => {
-        const next = Math.min(current + 10, 100)
-        if (next === 100) {
-          if (timerRef.current !== null) {
-            window.clearInterval(timerRef.current)
-          }
-
-          setDataset({
-            id: crypto.randomUUID(),
-            name: file.name,
-            rows: 2487,
-            columns: 7,
-            uploadDate: formatUploadDate(),
-            status: "Ready",
-            previewRows: mockPreviewRows,
-          })
-          setUploadPhase("success")
+    let active = true
+    const intervalId = window.setInterval(async () => {
+      try {
+        const current = await getInvestigationStatus(investigationId)
+        if (!active) {
+          return
         }
 
-        return next
+        setStatus(current)
+
+        if (current.status === "completed") {
+          const findingsResponse = await getInvestigationFindings(investigationId)
+          if (!active) {
+            return
+          }
+          setFindings(findingsResponse)
+          setStep(5)
+          window.clearInterval(intervalId)
+        }
+
+        if (current.status === "failed") {
+          setError(current.warnings[0] ?? "Investigation failed")
+          window.clearInterval(intervalId)
+        }
+      } catch (err) {
+        if (!active) {
+          return
+        }
+        const message = err instanceof Error ? err.message : "Failed to monitor investigation"
+        setError(message)
+        window.clearInterval(intervalId)
+      }
+    }, 1200)
+
+    return () => {
+      active = false
+      window.clearInterval(intervalId)
+    }
+  }, [investigationId, step])
+
+  async function handleUploadStep() {
+    if (!selectedFile) {
+      setError("Select a dataset file before continuing")
+      return
+    }
+
+    setLoading(true)
+    setError(null)
+    setUploadPhase("uploading")
+    setUploadProgress(35)
+
+    try {
+      const uploaded = await uploadDataset(selectedFile)
+      setUploadProgress(100)
+      setDatasetId(uploaded.dataset_id)
+      setUploadPhase("success")
+      setStep(1)
+    } catch (err) {
+      setUploadPhase("error")
+      setUploadProgress(0)
+      const message = err instanceof Error ? err.message : "Dataset upload failed"
+      setError(message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  async function handleSemanticProfileStep() {
+    if (!datasetId) {
+      setError("Upload dataset before generating semantic profile")
+      return
+    }
+
+    setLoading(true)
+    setError(null)
+    try {
+      const profile = await generateSemanticProfile(datasetId)
+      const goalsResponse = await getBusinessGoals()
+      setSemanticProfile(profile)
+      setGoals(goalsResponse)
+      setStep(2)
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Semantic profiling failed"
+      setError(message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  async function handleStartInvestigation() {
+    if (!datasetId || !selectedGoalId) {
+      setError("Select a business goal before running investigation")
+      return
+    }
+
+    setLoading(true)
+    setError(null)
+    try {
+      const started = await startInvestigation(datasetId, selectedGoalId)
+      setInvestigationId(started.investigation_id)
+      setStatus({
+        investigation_id: started.investigation_id,
+        status: started.status,
+        progress: started.progress,
+        current_step: started.current_step,
+        warnings: [],
       })
-    }, 180)
+      setStep(4)
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to start investigation"
+      setError(message)
+    } finally {
+      setLoading(false)
+    }
   }
 
-  function canContinueCurrentStep() {
-    if (step === 0) return question.trim().length > 12
-    if (step === 1) return audience !== null && goal !== null
-    if (step === 2) return informationSource !== null
-    if (step === 3) return informationSource === "nothing" || dataset !== null
-    return true
-  }
+  async function nextStep() {
+    if (loading) {
+      return
+    }
 
-  function nextStep() {
-    if (step < chapters.length - 1) {
-      setStep((current) => current + 1)
+    if (step === 0) {
+      await handleUploadStep()
+      return
+    }
+
+    if (step === 1) {
+      await handleSemanticProfileStep()
+      return
+    }
+
+    if (step === 2) {
+      if (!selectedGoalId) {
+        setError("Choose a business goal before continuing")
+        return
+      }
+      setStep(3)
+      return
+    }
+
+    if (step === 3) {
+      await handleStartInvestigation()
     }
   }
 
   function previousStep() {
+    if (loading || step === 4) {
+      return
+    }
     if (step > 0) {
       setStep((current) => current - 1)
     }
   }
 
-  function updateMapping(id: string, choice: MappingChoice) {
-    setMappingRows((current) => current.map((row) => (row.id === id ? { ...row, choice } : row)))
-  }
-
-  function beginInvestigation() {
-    const audienceLabel = audienceOptions.find((option) => option.value === audience)?.label
-    const goalLabel = goalOptions.find((option) => option.value === goal)?.label
-
-    localStorage.setItem(
-      "blip-investigation-draft-v1",
-      JSON.stringify({
-        question,
-        audience: audienceLabel,
-        goal: goalLabel,
-        datasetName: dataset?.name,
-      })
-    )
-
-    router.push("/investigations/workspace")
+  function resetWorkflow() {
+    setStep(0)
+    setSelectedFile(null)
+    setUploadPhase("select")
+    setUploadProgress(0)
+    setDatasetId(null)
+    setSemanticProfile(null)
+    setSelectedGoalId(null)
+    setInvestigationId(null)
+    setStatus(null)
+    setFindings(null)
+    setError(null)
   }
 
   return (
@@ -210,7 +231,7 @@ export function InvestigationCreationWizard() {
             <p className="text-sm text-muted-foreground">{completion}% complete</p>
           </div>
 
-          <div className="mt-4 grid grid-cols-7 gap-2">
+          <div className="mt-4 grid grid-cols-6 gap-2">
             {chapters.map((chapter, index) => (
               <button
                 key={chapter}
@@ -236,210 +257,246 @@ export function InvestigationCreationWizard() {
           {step === 0 ? (
             <div className="space-y-5">
               <div>
-                <h1 className="text-2xl font-semibold tracking-tight">What would we like to understand today?</h1>
-                <p className="mt-1 text-sm text-muted-foreground">Start with a clear business question.</p>
+                <h1 className="text-2xl font-semibold tracking-tight">Upload dataset</h1>
+                <p className="mt-1 text-sm text-muted-foreground">Step 1: Add a CSV or Excel file to begin your investigation.</p>
               </div>
 
-              <textarea
-                value={question}
-                onChange={(event) => setQuestion(event.target.value)}
-                className="min-h-36 w-full resize-none rounded-xl border border-input bg-background p-4 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                placeholder="Describe the question we want to investigate..."
+              <FileUploadZone
+                onFileSelected={(file) => {
+                  setSelectedFile(file)
+                  setError(null)
+                }}
               />
 
-              <div>
-                <p className="mb-2 text-sm font-medium text-muted-foreground">Example questions</p>
-                <div className="flex flex-wrap gap-2">
-                  {questionExamples.map((example) => (
-                    <Button key={example} type="button" variant="outline" size="sm" onClick={() => setQuestion(example)}>
-                      {example}
-                    </Button>
-                  ))}
+              {selectedFile ? (
+                <p className="text-sm text-muted-foreground">
+                  Selected file: <span className="font-medium text-foreground">{selectedFile.name}</span>
+                </p>
+              ) : null}
+
+              {uploadPhase === "uploading" ? <UploadProgress value={uploadProgress} /> : null}
+
+              {uploadPhase === "success" ? (
+                <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-4 text-sm text-emerald-700 dark:text-emerald-400">
+                  Dataset uploaded successfully.
                 </div>
-              </div>
+              ) : null}
             </div>
           ) : null}
 
           {step === 1 ? (
             <div className="space-y-6">
               <div>
-                <h2 className="text-2xl font-semibold tracking-tight">Context</h2>
-                <p className="mt-1 text-sm text-muted-foreground">Tell us who this investigation supports and what outcome matters most.</p>
+                <h2 className="text-2xl font-semibold tracking-tight">Display semantic profile</h2>
+                <p className="mt-1 text-sm text-muted-foreground">Step 2: BLIP is understanding your dataset structure and quality.</p>
               </div>
 
-              <div className="space-y-3">
-                <p className="text-sm font-medium">Who is this investigation for?</p>
-                <div className="grid gap-2 sm:grid-cols-2">
-                  {audienceOptions.map((option) => (
-                    <button
-                      key={option.value}
-                      type="button"
-                      onClick={() => setAudience(option.value)}
-                      className={cn(
-                        "rounded-lg border px-4 py-3 text-left text-sm transition-colors",
-                        audience === option.value ? "border-primary bg-primary/10 text-primary" : "border-border bg-background"
-                      )}
-                    >
-                      {option.label}
-                    </button>
-                  ))}
-                </div>
+              <div className="rounded-xl border border-border bg-muted/20 p-4">
+                <p className="text-sm text-muted-foreground">Understanding your dataset...</p>
+                <p className="mt-1 text-sm text-muted-foreground">Click Continue to generate the semantic profile.</p>
               </div>
 
-              <div className="space-y-3">
-                <p className="text-sm font-medium">Goal</p>
-                <div className="grid gap-2 sm:grid-cols-2">
-                  {goalOptions.map((option) => (
-                    <button
-                      key={option.value}
-                      type="button"
-                      onClick={() => setGoal(option.value)}
-                      className={cn(
-                        "rounded-lg border px-4 py-3 text-left text-sm transition-colors",
-                        goal === option.value ? "border-primary bg-primary/10 text-primary" : "border-border bg-background"
-                      )}
-                    >
-                      {option.label}
-                    </button>
-                  ))}
+              {semanticProfile ? (
+                <div className="space-y-4">
+                  <div className="grid gap-3 sm:grid-cols-4">
+                    <div className="rounded-lg border border-border bg-background p-3">
+                      <p className="text-xs text-muted-foreground">Columns</p>
+                      <p className="mt-1 text-lg font-semibold">{semanticProfile.columns}</p>
+                    </div>
+                    <div className="rounded-lg border border-border bg-background p-3">
+                      <p className="text-xs text-muted-foreground">Measures</p>
+                      <p className="mt-1 text-lg font-semibold">{semanticProfile.measures}</p>
+                    </div>
+                    <div className="rounded-lg border border-border bg-background p-3">
+                      <p className="text-xs text-muted-foreground">Dimensions</p>
+                      <p className="mt-1 text-lg font-semibold">{semanticProfile.dimensions}</p>
+                    </div>
+                    <div className="rounded-lg border border-border bg-background p-3">
+                      <p className="text-xs text-muted-foreground">Health score</p>
+                      <p className="mt-1 text-lg font-semibold">{Math.round(semanticProfile.health_score * 100)}%</p>
+                    </div>
+                  </div>
+
+                  <div className="overflow-hidden rounded-xl border border-border">
+                    <table className="w-full border-collapse text-sm">
+                      <thead className="bg-muted/20 text-left text-xs uppercase tracking-wide text-muted-foreground">
+                        <tr>
+                          <th className="px-3 py-2">Column</th>
+                          <th className="px-3 py-2">Type</th>
+                          <th className="px-3 py-2">Primitive</th>
+                          <th className="px-3 py-2">Missing</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {semanticProfile.columns_profile.map((column) => (
+                          <tr key={column.name} className="border-t border-border/70">
+                            <td className="px-3 py-2">{column.name}</td>
+                            <td className="px-3 py-2 text-muted-foreground">{column.data_type}</td>
+                            <td className="px-3 py-2">{column.primitive}</td>
+                            <td className="px-3 py-2">{column.missing_values}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
-              </div>
+              ) : null}
             </div>
           ) : null}
 
           {step === 2 ? (
             <div className="space-y-5">
               <div>
-                <h2 className="text-2xl font-semibold tracking-tight">What information do we already have?</h2>
-                <p className="mt-1 text-sm text-muted-foreground">Choose the option that best matches your current situation.</p>
+                <h2 className="text-2xl font-semibold tracking-tight">Choose Business Goal</h2>
+                <p className="mt-1 text-sm text-muted-foreground">Step 3: Choose what you want BLIP to achieve.</p>
               </div>
 
               <div className="grid gap-3 sm:grid-cols-2">
-                {infoOptions.map((option) => (
+                {goals.map((goal) => (
                   <button
-                    key={option.value}
+                    key={goal.goal_id}
                     type="button"
-                    onClick={() => setInformationSource(option.value)}
+                    onClick={() => {
+                      setSelectedGoalId(goal.goal_id)
+                      setError(null)
+                    }}
                     className={cn(
                       "rounded-xl border p-4 text-left transition-colors",
-                      informationSource === option.value ? "border-primary bg-primary/10" : "border-border bg-background"
+                      selectedGoalId === goal.goal_id ? "border-primary bg-primary/10" : "border-border bg-background"
                     )}
                   >
-                    <p className="font-medium">{option.label}</p>
-                    <p className="mt-1 text-sm text-muted-foreground">{option.description}</p>
+                    <p className="font-medium">{goal.name}</p>
+                    <p className="mt-1 text-sm text-muted-foreground">{goal.description}</p>
+                    <p className="mt-2 text-xs uppercase tracking-wide text-muted-foreground">{goal.business_purpose}</p>
                   </button>
                 ))}
               </div>
-
-              {informationSource === "nothing" ? (
-                <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-4 text-sm text-emerald-700 dark:text-emerald-400">
-                  You can continue without adding information now. We&apos;ll guide you when you&apos;re ready.
-                </div>
-              ) : null}
             </div>
           ) : null}
 
           {step === 3 ? (
             <div className="space-y-5">
               <div>
-                <h2 className="text-2xl font-semibold tracking-tight">Upload</h2>
-                <p className="mt-1 text-sm text-muted-foreground">Add your information when ready.</p>
+                <h2 className="text-2xl font-semibold tracking-tight">Run Investigation</h2>
+                <p className="mt-1 text-sm text-muted-foreground">Step 4: BLIP will execute the selected goal against your semantic profile.</p>
               </div>
 
-              {informationSource === "nothing" ? (
-                <div className="rounded-xl border border-border bg-muted/20 p-4 text-sm text-muted-foreground">
-                  You can continue now without an upload. We&apos;ll help you add information later.
-                </div>
-              ) : (
-                <>
-                  {uploadPhase === "select" ? (
-                    <FileUploadZone
-                      onFileSelected={(file) => {
-                        if (file) {
-                          startUpload(file)
-                        }
-                      }}
-                    />
-                  ) : null}
-                  {uploadPhase === "uploading" ? <UploadProgress value={uploadProgress} /> : null}
-                  {uploadPhase === "success" && dataset ? (
-                    <div className="space-y-4">
-                      <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-4">
-                        <p className="font-medium text-emerald-700 dark:text-emerald-400">Your data is ready.</p>
-                        <p className="mt-1 text-sm text-emerald-700/90 dark:text-emerald-400/90">
-                          We&apos;ve prepared a preview below.
-                        </p>
-                      </div>
-                      <DatasetPreviewTable rows={dataset.previewRows} />
-                    </div>
-                  ) : null}
-                </>
-              )}
+              <div className="rounded-xl border border-border bg-muted/20 p-4 text-sm text-muted-foreground">
+                Planning the investigation and preparing analytical capability execution.
+              </div>
             </div>
           ) : null}
 
           {step === 4 ? (
             <div className="space-y-5">
               <div>
-                <h2 className="text-2xl font-semibold tracking-tight">Understanding Your Information</h2>
-                <p className="mt-1 text-sm text-muted-foreground">Here is what we noticed and why it matters.</p>
+                <h2 className="text-2xl font-semibold tracking-tight">Execution Progress</h2>
+                <p className="mt-1 text-sm text-muted-foreground">Step 5: Track investigation progress across the BLIP pipeline.</p>
               </div>
-              <InformationHealthSummary issues={informationIssues(dataset !== null)} />
+
+              <div className="rounded-xl border border-border bg-card p-4">
+                <p className="inline-flex items-center gap-2 text-sm font-medium text-foreground">
+                  <LoaderCircle className="size-4 animate-spin" />
+                  {status?.current_step ?? "Starting investigation..."}
+                </p>
+                <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-muted">
+                  <div
+                    className="h-full rounded-full bg-primary transition-all"
+                    style={{ width: `${status?.progress ?? 0}%` }}
+                  />
+                </div>
+                <p className="mt-2 text-xs text-muted-foreground">{status?.progress ?? 0}% complete</p>
+              </div>
+
+              <div className="space-y-2 rounded-xl border border-border bg-muted/20 p-4 text-sm text-muted-foreground">
+                <p>Understanding your dataset...</p>
+                <p>Planning the investigation...</p>
+                <p>Executing analytical capabilities...</p>
+                <p>Building findings...</p>
+              </div>
             </div>
           ) : null}
 
-          {step === 5 ? (
+          {step === 5 && findings ? (
             <div className="space-y-5">
               <div>
-                <h2 className="text-2xl font-semibold tracking-tight">Connecting Information</h2>
-                <p className="mt-1 text-sm text-muted-foreground">Confirm suggested matches, confidence, and make any overrides you need.</p>
+                <h2 className="text-2xl font-semibold tracking-tight">Findings</h2>
+                <p className="mt-1 text-sm text-muted-foreground">Step 6: Review structured findings with supporting analyses and evidence.</p>
               </div>
-              <ConnectionMappingTable rows={mappingRows} onChoiceChange={updateMapping} />
+
+              <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-4">
+                <p className="inline-flex items-center gap-2 text-sm font-medium text-emerald-700 dark:text-emerald-400">
+                  <CheckCircle2 className="size-4" />
+                  Investigation complete with confidence {Math.round(findings.confidence * 100)}%
+                </p>
+              </div>
+
+              <div className="space-y-3">
+                {findings.findings_collection.findings.map((finding) => (
+                  <article key={finding.id} className="rounded-xl border border-border bg-card p-4">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <h3 className="text-base font-semibold">{finding.title}</h3>
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <span className="rounded-full border border-border px-2 py-1">{finding.severity}</span>
+                        <span className="rounded-full border border-border px-2 py-1">{Math.round(finding.confidence * 100)}% confidence</span>
+                      </div>
+                    </div>
+                    <p className="mt-2 text-sm text-muted-foreground">{finding.description}</p>
+                    <p className="mt-2 text-xs text-muted-foreground">Supporting analyses: {finding.supporting_analyses.join(", ")}</p>
+
+                    <details className="mt-3 rounded-lg border border-border bg-muted/20 p-3">
+                      <summary className="cursor-pointer text-sm font-medium">Inspect supporting evidence</summary>
+                      <div className="mt-3 space-y-2">
+                        {finding.supporting_evidence.map((evidence, index) => (
+                          <div key={`${finding.id}-${index}`} className="rounded-md border border-border bg-background p-2 text-sm">
+                            <p className="font-medium">{evidence.capability_name} • {evidence.evidence_type}</p>
+                            <p className="text-muted-foreground">Value: {evidence.evidence_value}</p>
+                            <p className="text-xs text-muted-foreground">Trace: {evidence.trace_reference}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </details>
+                  </article>
+                ))}
+              </div>
+
+              <Button type="button" variant="outline" onClick={resetWorkflow}>
+                Start another investigation
+              </Button>
             </div>
           ) : null}
 
-          {step === 6 ? (
-            <div className="space-y-5">
-              <div>
-                <h2 className="text-2xl font-semibold tracking-tight">Ready</h2>
-                <p className="mt-1 text-sm text-muted-foreground">Everything is prepared.</p>
-              </div>
-
-              <div className="grid gap-3">
-                <div className="rounded-lg border border-border bg-muted/20 px-4 py-3 text-sm font-medium">
-                  <span className="inline-flex items-center gap-2">
-                    <CheckCircle2 className="size-4 text-emerald-500" />
-                    Question ✓
-                  </span>
-                </div>
-                <div className="rounded-lg border border-border bg-muted/20 px-4 py-3 text-sm font-medium">
-                  <span className="inline-flex items-center gap-2">
-                    <CheckCircle2 className="size-4 text-emerald-500" />
-                    Information ✓
-                  </span>
-                </div>
-                <div className="rounded-lg border border-border bg-muted/20 px-4 py-3 text-sm font-medium">
-                  <span className="inline-flex items-center gap-2">
-                    <CheckCircle2 className="size-4 text-emerald-500" />
-                    Connections ✓
-                  </span>
-                </div>
-              </div>
-
-              <Button className="h-10 px-5" onClick={beginInvestigation}>Begin Investigation</Button>
+          {error ? (
+            <div className="mt-4 rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-700 dark:text-red-300">
+              {error}
             </div>
           ) : null}
 
           <div className="mt-6 flex items-center justify-between border-t border-border pt-5">
-            <Button type="button" variant="ghost" onClick={previousStep} disabled={step === 0}>
+            <Button type="button" variant="ghost" onClick={previousStep} disabled={step === 0 || loading || step === 4}>
               <ArrowLeft className="size-4" />
               Back
             </Button>
 
-            {step < chapters.length - 1 ? (
-              <Button type="button" onClick={nextStep} disabled={!canContinueCurrentStep()}>
-                Continue
-                <ArrowRight className="size-4" />
+            {step < 4 ? (
+              <Button type="button" onClick={nextStep} disabled={loading}>
+                {loading ? (
+                  <>
+                    <LoaderCircle className="size-4 animate-spin" />
+                    Working...
+                  </>
+                ) : (
+                  <>
+                    Continue
+                    <ArrowRight className="size-4" />
+                  </>
+                )}
+              </Button>
+            ) : null}
+
+            {step === 4 ? (
+              <Button type="button" variant="outline" disabled>
+                Monitoring progress...
               </Button>
             ) : null}
           </div>

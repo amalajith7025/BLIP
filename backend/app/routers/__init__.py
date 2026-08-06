@@ -25,3 +25,4 @@ from .recommendation import (
 from .auth import router as auth_router
 from .user import router as user_router
 from .workspace import router as workspace_router
+from .investigation_pipeline import router as investigation_pipeline_router

@@ -22,6 +22,7 @@ from app.routers import (
     auth_router,
     user_router,
     workspace_router,
+    investigation_pipeline_router,
 )
 
 Base.metadata.create_all(bind=engine)
@@ -48,6 +49,7 @@ app.include_router(recommendation_router)
 app.include_router(auth_router)
 app.include_router(user_router)
 app.include_router(workspace_router)
+app.include_router(investigation_pipeline_router)
 
 
 @app.get("/")

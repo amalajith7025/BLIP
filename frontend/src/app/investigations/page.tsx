@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation"
 
 export default function InvestigationsPage() {
-  redirect("/investigations/workspace")
+  redirect("/investigations/new")
 }

@@ -5,7 +5,7 @@ export const mockPreviewRows: PreviewRow[] = [
     date: "2026-07-01",
     region: "North America",
     account: "Summit Retail Group",
-    productLine: "Enterprise Analytics",
+    productLine: "Enterprise Performance",
     units: 42,
     revenue: "$84,000",
     margin: "31%",

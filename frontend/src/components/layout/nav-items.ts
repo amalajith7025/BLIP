@@ -15,7 +15,7 @@ export type NavItem = {
 
 export const navItems: NavItem[] = [
   { label: "Home", href: "/", icon: Home },
-  { label: "Investigations", href: "/investigations", icon: Search },
+  { label: "Investigations", href: "/investigations/workspace", icon: Search },
   { label: "Reports", href: "/reports", icon: BarChart3 },
   { label: "Library", href: "/library", icon: BookMarked },
   { label: "Settings", href: "/settings", icon: Settings },
